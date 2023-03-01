@@ -2,6 +2,7 @@ import pytesseract
 from PIL import Image
 from os import listdir
 from os.path import join
+import re
 
 
 pytesseract.pytesseract.tesseract_cmd = (
@@ -15,16 +16,22 @@ ndigits = len(str(nimages))
 txt = ''
 for i, path in enumerate(images):
     # Separate pages (optional)
-    txt += f"\n{f' page {i+1} ':#^50}\n\n"
+    # txt += f"\n{f' page {i+1} ':#^50}\n\n"
     # Read images
     txt += pytesseract.image_to_string(
         Image.open(join('Almanach', 'images', path)),
+        config='--psm 4',
         lang='fra'  # https://github.com/tesseract-ocr/tessdata
     )
     # Update progress bar
     print(f"\r{i+1:>{ndigits}}/{nimages} pages treated"
           f" |{'█'*round((i+1)/nimages*20):<20}| "
           f"({(i+1)/nimages:.0%})", end="")
+
+
+def correct(s: str) -> list[str]:
+    s = s.split()
+
 
 # Write text to a file
 with open(join('Almanach', 'Almanach.txt'), 'w', encoding='UTF-16') as file:
